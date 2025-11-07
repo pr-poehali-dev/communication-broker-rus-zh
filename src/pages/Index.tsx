@@ -12,15 +12,34 @@ import Icon from '@/components/ui/icon';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedChat, setSelectedChat] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
 
   const products = [
-    { id: 1, name: 'Смартфоны Xiaomi', price: '15 000 ₽', country: '🇨🇳', category: 'Электроника', seller: 'TechDragon', verified: true },
-    { id: 2, name: 'Чай Пуэр премиум', price: '2 500 ₽', country: '🇨🇳', category: 'Продукты', seller: 'TeaHouse', verified: true },
-    { id: 3, name: 'Строительные материалы', price: '50 000 ₽', country: '🇷🇺', category: 'Стройка', seller: 'StroyBase', verified: true },
-    { id: 4, name: 'LED светильники', price: '1 200 ₽', country: '🇨🇳', category: 'Освещение', seller: 'LightWay', verified: false },
-    { id: 5, name: 'Мебель из дерева', price: '45 000 ₽', country: '🇷🇺', category: 'Мебель', seller: 'WoodCraft', verified: true },
-    { id: 6, name: 'Текстиль оптом', price: '800 ₽/м', country: '🇨🇳', category: 'Ткани', seller: 'SilkRoad', verified: true },
+    { id: 1, name: 'Смартфоны Xiaomi', price: '15 000 ₽', country: '🇨🇳', countryCode: 'CN', category: 'Электроника', seller: 'TechDragon', verified: true },
+    { id: 2, name: 'Чай Пуэр премиум', price: '2 500 ₽', country: '🇨🇳', countryCode: 'CN', category: 'Продукты', seller: 'TeaHouse', verified: true },
+    { id: 3, name: 'Строительные материалы', price: '50 000 ₽', country: '🇷🇺', countryCode: 'RU', category: 'Стройка', seller: 'StroyBase', verified: true },
+    { id: 4, name: 'LED светильники', price: '1 200 ₽', country: '🇨🇳', countryCode: 'CN', category: 'Освещение', seller: 'LightWay', verified: false },
+    { id: 5, name: 'Мебель из дерева', price: '45 000 ₽', country: '🇷🇺', countryCode: 'RU', category: 'Мебель', seller: 'WoodCraft', verified: true },
+    { id: 6, name: 'Текстиль оптом', price: '800 ₽/м', country: '🇨🇳', countryCode: 'CN', category: 'Ткани', seller: 'SilkRoad', verified: true },
+    { id: 7, name: 'Автозапчасти', price: '3 500 ₽', country: '🇨🇳', countryCode: 'CN', category: 'Автозапчасти', seller: 'AutoParts', verified: true },
+    { id: 8, name: 'Химическое сырье', price: '25 000 ₽', country: '🇷🇺', countryCode: 'RU', category: 'Химия', seller: 'ChemBase', verified: true },
+    { id: 9, name: 'Игрушки оптом', price: '150 ₽/шт', country: '🇨🇳', countryCode: 'CN', category: 'Игрушки', seller: 'ToyWorld', verified: false },
   ];
+
+  const categories = ['Электроника', 'Продукты', 'Стройка', 'Освещение', 'Мебель', 'Ткани', 'Автозапчасти', 'Химия', 'Игрушки'];
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.seller.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCountry = selectedCountry === 'all' || product.countryCode === selectedCountry;
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    const matchesVerified = !showVerifiedOnly || product.verified;
+    
+    return matchesSearch && matchesCountry && matchesCategory && matchesVerified;
+  });
 
   const sellers = [
     { id: 1, name: 'TechDragon', country: '🇨🇳', products: 234, rating: 4.8, verified: true, category: 'Электроника' },
@@ -166,17 +185,96 @@ const Index = () => {
           <div className="space-y-6 animate-fade-in">
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold">Каталог товаров</h2>
-              <div className="flex items-center gap-4">
-                <Input placeholder="Поиск товаров..." className="w-80" />
-                <Button variant="outline">
-                  <Icon name="Filter" size={18} className="mr-2" />
-                  Фильтры
+              <Input 
+                placeholder="Поиск товаров, продавцов..." 
+                className="w-80" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <Card className="p-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Icon name="Globe" size={18} className="text-muted-foreground" />
+                  <span className="text-sm font-medium">Страна:</span>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant={selectedCountry === 'all' ? 'default' : 'outline'} 
+                      size="sm"
+                      onClick={() => setSelectedCountry('all')}
+                    >
+                      Все
+                    </Button>
+                    <Button 
+                      variant={selectedCountry === 'RU' ? 'default' : 'outline'} 
+                      size="sm"
+                      onClick={() => setSelectedCountry('RU')}
+                    >
+                      🇷🇺 Россия
+                    </Button>
+                    <Button 
+                      variant={selectedCountry === 'CN' ? 'default' : 'outline'} 
+                      size="sm"
+                      onClick={() => setSelectedCountry('CN')}
+                    >
+                      🇨🇳 Китай
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator orientation="vertical" className="h-8" />
+
+                <div className="flex items-center gap-2">
+                  <Icon name="Tag" size={18} className="text-muted-foreground" />
+                  <span className="text-sm font-medium">Категория:</span>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="rounded-md border bg-background px-3 py-1.5 text-sm"
+                  >
+                    <option value="all">Все категории</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <Separator orientation="vertical" className="h-8" />
+
+                <Button
+                  variant={showVerifiedOnly ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                >
+                  <Icon name="BadgeCheck" size={16} className="mr-2" />
+                  Только проверенные
                 </Button>
+
+                {(selectedCountry !== 'all' || selectedCategory !== 'all' || showVerifiedOnly || searchQuery) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCountry('all');
+                      setSelectedCategory('all');
+                      setShowVerifiedOnly(false);
+                      setSearchQuery('');
+                    }}
+                  >
+                    <Icon name="X" size={16} className="mr-2" />
+                    Сбросить
+                  </Button>
+                )}
               </div>
+            </Card>
+
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Найдено товаров: {filteredProducts.length}</span>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <Card key={product.id} className="hover-scale overflow-hidden">
                   <div className="aspect-video bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center text-6xl">
                     {product.country}
